@@ -1,0 +1,6 @@
+./ChatBackend/node_modules
+./ChatFrontend/node_modules
+
+node_modules
+dist
+.cache
