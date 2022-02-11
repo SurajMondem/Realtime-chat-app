@@ -18,28 +18,21 @@ const io = socketIo(server, {
 });
 
 io.on('connection', (socket) => {
-  console.log('new client connected: ', socket.id);
-  let interval;
-  if(interval){
-    clearInterval(interval);
-  }
-  interval = setInterval(() => {
-    return getApiAndEmit(socket)
-  }, 1000);
+  const id = socket.handshake.query.id;
+  socket.join(id)
 
-  // socket.join('chat room')
+  socket.on('send-message', ({recipients, text}) => {
+    recipients.forEach(recipient => {
+      const newRecipient = recipients.filter(r => r !== recipient)
+      newRecipient.push(id)
+      socket.broadcast.to(recipient).emit('recieve-message', {
+        recipients: newRecipient, sender: id, text
+      })
+    })
 
-  socket.on('disconnect', (reason) => {
-    console.log('Client Disconnected', reason);
-    clearInterval(interval);
+
   })
 })
-
-const getApiAndEmit = socket => {
-  const response = new Date();
-  
-  socket.emit('FromAPI', response);
-}
 
 server.listen(PORT, err => {
   if(err) console.log(err);
